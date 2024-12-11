@@ -25,6 +25,7 @@ def create_user():
         email=data['email'],
         password=data['password'],
         role=data['role'],
+        cpf=data['cpf'],
         main_operation_geocode=data["main_operation_geocode"],
         created_at=datetime.datetime.now(datetime.timezone.utc)
     )

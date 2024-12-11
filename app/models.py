@@ -3,6 +3,10 @@ import enum
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Float, Text, Uuid, Enum, JSON
 from sqlalchemy.sql import func
 
+class BikeKind(str, enum.Enum): 
+    Motorbike = "Motorbike"
+    Bike = "Bike"
+
 class UserRole(str, enum.Enum):
     Courier = "Courier"
     Company = "Company"
@@ -15,22 +19,27 @@ class DeliveryStatus(str, enum.Enum):
     Failed = "Failed"
     Completed = "Completed"
 
-class Session(db.Model):
-    __tablename__ = 'sessions'
+class BikeVehicle(db.Model):
+    __tablename__ = "bike_vehicles"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    device_id = Column(String(255), nullable=False)
-    device_name = Column(String(255), nullable=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    g_uuid = Column(Uuid, unique=True, nullable=True)
-    last_logged_in = Column(DateTime)
-    last_position_geocode = Column(JSON, nullable=False)
+    owner_id =  Column(Integer, ForeignKey('users.id'), nullable=False)
+    kind = Column(Enum(BikeKind), nullable=False)
+    bike_plate = Column(String(12), nullable=True)
+    bike_color = Column(String(255), nullable=False)
+    bike_brand = Column(String(255), nullable=False)
+
+class Company(db.Model):
+    __tablename__ = "company"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    owner_id =  Column(Integer, ForeignKey('users.id'), nullable=False)
+    name = Column(String(255), nullable=False)
 
 class User(db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(255), nullable=False)
     email = Column(String(255), nullable=False, unique=True)
-    cellphone = Column(String(20), nullable=True)
+    cpf = Column(String(255), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
     role = Column(Enum(UserRole), nullable=False)
     created_at = Column(DateTime)
