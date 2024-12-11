@@ -1,18 +1,19 @@
 from .modules import db
 import enum
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Float, Text, Uuid, ARRAY, Enum
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Float, Text, Uuid, Enum, JSON
+from sqlalchemy.sql import func
 
-class UserRole(enum.Enum):
-    Courier = 0
-    Company = 1
-    ServiceManager = 2
+class UserRole(str, enum.Enum):
+    Courier = "Courier"
+    Company = "Company"
+    ServiceManager = "ServiceManager"
 
-class DeliveryStatus(enum.Enum):
-    Pending = 0
-    Assigned = 1
-    OnCourse = 2
-    Failed = 3
-    Completed = 4
+class DeliveryStatus(str, enum.Enum):
+    Pending = "Pending"
+    Assigned = "Assigned"
+    OnCourse = "OnCourse"
+    Failed = "Failed"
+    Completed = "Completed"
 
 class Session(db.Model):
     __tablename__ = 'sessions'
@@ -21,32 +22,30 @@ class Session(db.Model):
     device_name = Column(String(255), nullable=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     g_uuid = Column(Uuid, unique=True, nullable=True)
-    last_logged_in = Column(DateTime, nullable=False)
-    last_position_geocode = Column(ARRAY(Float), nullable=False)
+    last_logged_in = Column(DateTime)
+    last_position_geocode = Column(JSON, nullable=False)
 
 class User(db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(255), nullable=False, unique=True)
+    username = Column(String(255), nullable=False)
     email = Column(String(255), nullable=False, unique=True)
     cellphone = Column(String(20), nullable=True)
     password = Column(String(255), nullable=False)
     role = Column(Enum(UserRole), nullable=False)
-    created_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime)
     profile_image = Column(String(255), nullable=True)
-    main_operation_geocode = Column(ARRAY(Float), nullable=False)
+    main_operation_geocode = Column(JSON, nullable=False)
     average_review_score = Column(Float, nullable=True)
-
-    deliveries = db.relationship('Delivery', backref='user', lazy=True)
 
 class Delivery(db.Model):
     __tablename__ = 'deliveries'
     id = Column(Integer, primary_key=True, autoincrement=True)
     courier_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     sending_company_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    receiving_company_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    sender_geocode = Column(ARRAY(Float), nullable=True)
-    receiver_geocode = Column(ARRAY(Float), nullable=True)
+    receiving_company_user_id = Column(Integer, ForeignKey('users.id'))
+    sender_geocode = Column(JSON, nullable=True)
+    receiver_geocode = Column(JSON, nullable=True)
     product_name = Column(String(255), nullable=False)
     product_image = Column(Text, nullable=True)
     product_details = Column(Text, nullable=True)
